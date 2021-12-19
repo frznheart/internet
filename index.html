@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./style.css">
+  <title>Document</title>
+  <style>
+    
+
+.form{
+    display: block;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+label{
+    margin-top:10px;
+}
+
+.show{
+    display: block;
+}
+  </style>
+</head>
+
+
+
+
+<body>
+  <form>
+    <label>Name</label>
+    <input class = 'form' type = 'text' name = 'name'>
+    <label>Age</label>
+    <input class = 'form' type = 'number' name = 'age'>
+    <button class = 'post'>POST</button>
+  </form>
+
+
+  <div class = 'data'>
+
+  </div>
+  
+
+
+  <script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
+  <script type="module">
+
+    const button = document.querySelector('.post');
+    const input = [...document.querySelectorAll('input')];
+    const disp = document.querySelector('.data')
+    button.onclick = (e) =>{
+      e.preventDefault();
+      const obj  ={}
+      input.forEach(dat=>{
+          obj[dat.name] = dat.value;
+    
+      })
+      postData(obj)
+    }
+    const postData = (data) =>{
+      fetch('https://lab2-6eba0-default-rtdb.asia-southeast1.firebasedatabase.app/name.json', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+      .then(res=>res.json())
+      .then(data=>{
+        console.log(data);
+        getSpecific(data.name)
+      })
+    }
+  const getSpecific = (id) =>{
+
+    fetch(`https://lab2-6eba0-default-rtdb.asia-southeast1.firebasedatabase.app/name/${id}.json`)
+    .then(res=>res.json())
+    .then(data=>{display(data, id)})
+  }
+  const display = (data, id) =>{
+    let div = document.createElement('div');
+        div.className = 'show'
+        let p = document.createElement('input');
+        p.value  = data.name;
+        p.disabled = true
+        div.appendChild(p);
+        let p2 = document.createElement('input');
+        p2.value = data.age;
+        p2.disabled = true
+        div.appendChild(p2);
+        let button = document.createElement('button');
+        button.textContent = 'Edit'
+        button.onclick = () =>{
+          p.disabled = false;
+          p2.disabled = false;
+          button.textContent = 'Submit'
+          button.onclick = () =>{
+            putData(id, {
+              name: p.value,
+              age: p2.value
+            });
+            p.disabled = true;
+            p2.disabled = true;            
+            button.textContent = 'Edit'
+          }
+        }
+        div.appendChild(button);
+        let button2 = document.createElement('button');
+    button2.id = id
+        button2.textContent = 'Delete'
+        button2.addEventListener('click', function(e){
+          deleteData(id);
+          div.style.display = 'none'
+        })
+        div.appendChild(button2);
+        disp.appendChild(div)
+  }
+  const getData = ()=>{
+    fetch('https://lab2-6eba0-default-rtdb.asia-southeast1.firebasedatabase.app/name.json')
+    .then(res=>res.json())
+    .then(data=>{
+      let keys = Object.keys(data)
+    
+      keys.forEach(d=>{
+        display(data[d], d)
+      })
+    })
+
+
+    
+
+
+  }
+  getData();
+  const putData = (id, data) =>{
+    fetch(`https://lab2-6eba0-default-rtdb.asia-southeast1.firebasedatabase.app/name/${id}.json`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    })
+      .then(res=>res.json())
+      .then(console.log)
+  }
+ 
+  const deleteData = (id) =>{
+    fetch(`https://lab2-6eba0-default-rtdb.asia-southeast1.firebasedatabase.app/name/${id}.json`, {
+      method: 'DELETE',
+    })
+      .then(res=>res.json())
+      .then(console.log)
+  }
+
+
+ 
+
+  </script>
+
+</body>
+
+</html>
